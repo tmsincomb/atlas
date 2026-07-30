@@ -131,3 +131,33 @@ jobs:
         uses: gitleaks/gitleaks-action@v3
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # .gitleaks.toml adds participant-identifier rules, so a finding can be
+          # participant-derived. Keep matches out of PR comments, job summaries,
+          # and downloadable artifacts; the job status is the signal.
+          GITLEAKS_ENABLE_COMMENTS: "false"
+          GITLEAKS_ENABLE_SUMMARY: "false"
+          GITLEAKS_ENABLE_UPLOAD_ARTIFACT: "false"
+
+  privacy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - name: participant identifiers in tracked files
+        run: |
+          if git grep -I -l -E 'G[0-9]{3}-[1-9]' -- . > hits.txt; then
+            echo "::error::participant-shaped identifiers in $(wc -l < hits.txt) tracked file(s)"
+            cut -d: -f1 hits.txt
+            exit 1
+          fi
+          echo "clean: no participant-shaped identifiers in tracked files"
+      - name: participant identifiers in commit messages
+        run: |
+          count=$(git log --all --format='%B' | grep -c -E 'G[0-9]{3}-[1-9]' || true)
+          if [ "$count" -gt 0 ]; then
+            echo "::error::participant-shaped identifiers in $count commit message line(s)"
+            exit 1
+          fi
+          echo "clean: no participant-shaped identifiers in commit messages"

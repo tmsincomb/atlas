@@ -1,0 +1,15 @@
+title = "atlas secret and participant-identifier scanning"
+
+# Keep every upstream secret rule; the rules below are additive.
+[extend]
+useDefault = true
+
+# Participant pubIDs are matched by shape, never by value: no real identifier is
+# stored in this repository. Fixture pubIDs are 0-prefixed (G002-091,
+# G003-08-004), so a digit 1-9 directly after the study code marks a real one
+# pasted from a filename. Mirrors the no-real-pubids pre-commit hook.
+[[rules]]
+id = "participant-pubid"
+description = "participant pubID shape (non-0-prefixed study participant identifier)"
+regex = '''\bG\d{3}-[1-9]'''
+tags = ["privacy", "participant"]
