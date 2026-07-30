@@ -1,0 +1,40 @@
+name: illumina-bcl-run
+version: "1.0"
+description: Illumina sequencer BCL run directory
+
+detection:
+  landmark: "RunInfo.xml"
+  landmark_type: file
+  unit_depth: 1
+  markers:
+    - "RunInfo.xml"
+    - "Data/Intensities/BaseCalls"
+
+sync:
+  include:
+    - "**/*"
+  exclude:
+    - "Thumbnail_Images/**"
+    - "Images/**"
+
+validate:
+  required:
+    - "RunInfo.xml"
+  required_dirs:
+    - "Data/Intensities/BaseCalls"
+  warn_if_missing:
+    - "RunParameters.xml"
+    - "InterOp"
+  fail_on:
+    - "RTAComplete.txt.error"
+  min_size_mb: 100.0
+  max_size_gb: 5000.0
+  min_file_count: 10
+  max_file_count: 10000000
+  filename_pattern: null
+
+key_outputs:
+  run_info: "RunInfo.xml"
+  run_parameters: "RunParameters.xml"
+  basecalls: "Data/Intensities/BaseCalls/"
+  interop: "InterOp/"

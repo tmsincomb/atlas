@@ -1,0 +1,4 @@
+# Fixture trees are committed test data — re-include paths the root
+# .gitignore blocks (its unanchored `dist/` would swallow the web-build
+# and monorepo-build fixtures).
+!dist/

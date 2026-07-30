@@ -1,0 +1,7 @@
+{
+  "workspace": "acme",
+  "packages": [
+    "core"
+  ],
+  "mode": "production"
+}

@@ -1,0 +1,87 @@
+name: 10x-cellranger-count
+version: "1.0"
+description: 10x Genomics Cell Ranger count pipeline output
+
+detection:
+  landmark: "outs/filtered_feature_bc_matrix.h5"
+  landmark_type: file
+  unit_depth: 2
+  markers:
+    - "outs/filtered_feature_bc_matrix.h5"
+    - "_cmdline"
+  exclude_if_markers:
+    - "SC_MULTI_CS"
+    - "outs/config.csv"
+
+sync:
+  include:
+    - "outs/**/*"
+  exclude:
+    - "SC_RNA_COUNTER_CS/**/*"
+    - "_*"
+    - "*.mri.tgz"
+
+validate:
+  required:
+    - "outs/filtered_feature_bc_matrix.h5"
+    - "outs/raw_feature_bc_matrix.h5"
+  required_dirs:
+    - "outs"
+  warn_if_missing:
+    - "outs/web_summary.html"
+    - "outs/metrics_summary.csv"
+  fail_on:
+    - "_errors"
+    - "*.error"
+  min_size_mb: 1.0
+  max_size_gb: 200.0
+  min_file_count: 5
+  max_file_count: 50000
+  filename_pattern: null
+
+key_outputs:
+  filtered_matrix: "outs/filtered_feature_bc_matrix.h5"
+  raw_matrix: "outs/raw_feature_bc_matrix.h5"
+  web_summary: "outs/web_summary.html"
+  metrics: "outs/metrics_summary.csv"
+  bam: "outs/possorted_genome_bam.bam"
+
+manifest:
+  records:
+    - name: filtered_matrix
+      glob: "outs/filtered_feature_bc_matrix.h5"
+      extractors: &cellranger_unit
+        - source: unit_name
+          regex: "^(?P<library_id>.+)$"
+    - name: raw_matrix
+      glob: "outs/raw_feature_bc_matrix.h5"
+      extractors: *cellranger_unit
+    - name: web_summary
+      glob: "outs/web_summary.html"
+      extractors: *cellranger_unit
+    - name: metrics
+      glob: "outs/metrics_summary.csv"
+      extractors: *cellranger_unit
+    - name: bam
+      glob: "outs/possorted_genome_bam.bam"
+      extractors: *cellranger_unit
+  tables:
+    - name: sequencing_manifest
+      glob: "**/sequencing_manifest.csv"
+      optional: true
+      rename:
+        ptid: pubID
+        timepoint: visit_id
+        sorted_date: sort_date
+      casts: &sequencing_casts
+        pubID: string
+        visit_id: string
+        sort_date: date
+        pool_number: string
+        vdj_index: string
+      date_formats: &sequencing_dates
+        sort_date: "%y%m%d"
+      join:
+        left: [library_id]
+        right: [vdj_index]
+        cardinality: one_to_many

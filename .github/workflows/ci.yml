@@ -1,0 +1,133 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v6
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+      - run: pip install -e ".[dev]"
+      - run: python3 -m pytest --durations=25 --reruns 1 | tee test-durations.txt
+        shell: bash
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: test-durations-${{ matrix.python-version }}
+          path: test-durations.txt
+
+  lint:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -e ".[dev]"
+      - run: ruff check .
+      - run: ruff format --check .
+      - run: mypy src/atlas
+
+  review:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+          cache: pip
+      - uses: reviewdog/action-setup@v1
+      - run: pip install ruff
+      - name: ruff via reviewdog
+        env:
+          REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          ruff check --output-format rdjson . |
+            reviewdog -f=rdjson -name=ruff -reporter=github-pr-review -fail-level=none
+
+  deps:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -e . deptry
+      - run: deptry .
+
+  duplication:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - run: npx --yes jscpd --config .jscpd.json src tests
+
+  security:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: semgrep
+        run: |
+          pip install semgrep
+          semgrep scan --config p/python --error --sarif-output semgrep.sarif src
+      - name: upload security review report
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: security-review-sarif
+          path: semgrep.sarif
+          if-no-files-found: ignore
+      - name: security assessment summary
+        if: always()
+        run: |
+          count=$(jq '[.runs[].results[]] | length' semgrep.sarif 2>/dev/null || echo "n/a")
+          {
+            echo "## Security review"
+            echo "- semgrep (p/python) over src: ${count} finding(s); SARIF uploaded as security-review-sarif"
+            echo "- gitleaks: full-history secret scan"
+          } >> "$GITHUB_STEP_SUMMARY"
+      - uses: reviewdog/action-setup@v1
+        if: always() && github.event_name == 'pull_request'
+      - name: semgrep findings to PR review
+        if: always() && github.event_name == 'pull_request'
+        env:
+          REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if [ -f semgrep.sarif ]; then
+            reviewdog -f=sarif -name=semgrep -reporter=github-pr-review -fail-level=none < semgrep.sarif
+          fi
+      - name: gitleaks
+        uses: gitleaks/gitleaks-action@v3
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

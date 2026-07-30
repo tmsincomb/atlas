@@ -1,0 +1,1 @@
+bundler build --minify --out dist

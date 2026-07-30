@@ -1,0 +1,121 @@
+# atlas documentation — Material for MkDocs
+# Config patterns adapted from the forest docs setup (tmsincomb/forest).
+
+site_name: atlas
+site_description: schema-driven cartography for project data — detect, validate, locate
+site_url: https://tmsincomb.github.io/atlas-manifest/
+repo_url: https://github.com/tmsincomb/atlas-manifest
+repo_name: tmsincomb/atlas-manifest
+edit_uri: edit/main/docs/
+copyright: Copyright &copy; Troy Sincomb &mdash; MIT License
+
+theme:
+  name: material
+  logo: assets/logo-mark.svg
+  favicon: assets/favicon.svg
+  icon:
+    repo: fontawesome/brands/github
+  font:
+    text: IBM Plex Sans
+    code: IBM Plex Mono
+  palette:
+    # Three-state toggle (auto -> light -> dark), same pattern Astral uses.
+    - media: "(prefers-color-scheme)"
+      toggle:
+        icon: material/brightness-auto
+        name: Switch to light mode
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: custom
+      accent: custom
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: custom
+      accent: custom
+      toggle:
+        icon: material/brightness-4
+        name: Switch to system preference
+  features:
+    - navigation.tabs
+    - navigation.instant
+    - navigation.instant.progress
+    - navigation.tracking
+    - navigation.top
+    - navigation.indexes
+    - navigation.footer
+    - toc.follow
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+    - content.code.annotate
+    - content.tabs.link
+    - content.action.edit
+
+nav:
+  - Home: index.md
+  - Getting started:
+      - Installation: getting-started/installation.md
+      - Quick start: getting-started/quickstart.md
+  - Concepts:
+      - Schemas & the data model: concepts/schemas.md
+      - Design decisions (ADRs):
+          - adr/index.md
+          - adr/0001-atlas-is-standalone.md
+          - adr/0002-textual-tui-as-optional-extra.md
+          - adr/0003-pandas-manifests.md
+  - Reference:
+      - CLI commands: reference/cli.md
+      - Schema file reference: reference/schemas.md
+      - Python API: reference/api.md
+      - Environment variables: reference/environment.md
+  - Guides:
+      - Writing a custom schema: guides/custom-schemas.md
+      - Operations:
+          - Schema not found: runbooks/schema-not-found.md
+          - Detection finds nothing: runbooks/detection-empty.md
+          - Validation failures: runbooks/validation-failures.md
+
+markdown_extensions:
+  # Structure & callouts
+  - admonition
+  - pymdownx.details
+  - attr_list
+  - md_in_html
+  - def_list
+  - tables
+  - footnotes
+  - toc:
+      permalink: true
+  # Code
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.keys
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.tabbed:
+      alternate_style: true
+  # Icons & emoji (enables :material-map: etc.)
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/tmsincomb/atlas-manifest
+
+extra_css:
+  - stylesheets/extra.css
+
+plugins:
+  - search

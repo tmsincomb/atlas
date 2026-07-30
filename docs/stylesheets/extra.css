@@ -1,0 +1,122 @@
+/* ── atlas docs palette ──────────────────────────────────────────────
+   deep-sea #0d3b5e   ocean #175d8d   harbor #2e7cb5
+   sky #6cb2e0   pin-gold #f0b429   amber #d98e04   parchment #f5ead6
+   Custom color scheme wiring per Material's "custom colors" docs.   */
+
+:root {
+  --md-primary-fg-color: #175d8d;
+  --md-primary-fg-color--light: #2e7cb5;
+  --md-primary-fg-color--dark: #0d3b5e;
+  --md-accent-fg-color: #d98e04;
+}
+
+/* Dark mode: ocean-tinted charcoal instead of stock blue-slate. */
+[data-md-color-scheme="slate"] {
+  --md-primary-fg-color: #0d3b5e;
+  --md-primary-fg-color--light: #175d8d;
+  --md-primary-fg-color--dark: #092a43;
+  --md-accent-fg-color: #f0b429;
+  --md-typeset-a-color: #6cb2e0;
+  --md-default-bg-color: #10171f;
+  --md-code-bg-color: #16212b;
+}
+
+/* Slightly tighter, calmer headings for IBM Plex Sans. */
+.md-typeset h1,
+.md-typeset h2 {
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+/* ── Landing hero: deep-sea band behind the terminal ─────────────────── */
+.atl-hero {
+  margin: 1.5rem 0 2rem;
+  padding: 1.1rem;
+  border-radius: 0.8rem;
+  border: 1px solid rgba(108, 178, 224, 0.16);
+  background-color: #0d3b5e;
+  background-image: linear-gradient(180deg, #0d3b5e, #092a43);
+  box-shadow: 0 16px 40px rgba(9, 42, 67, 0.35);
+}
+
+.atl-hero .atl-terminal {
+  margin: 0;
+}
+
+/* ── Signature element: the quick-start terminal on the landing page ── */
+.atl-terminal {
+  margin: 1.5rem 0 2rem;
+  border-radius: 0.6rem;
+  overflow: hidden;
+  background: #0e1620;
+  box-shadow: 0 12px 32px rgba(9, 42, 67, 0.35);
+  border: 1px solid rgba(108, 178, 224, 0.18);
+}
+
+.atl-terminal-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.55rem 0.9rem;
+  background: #13202c;
+  border-bottom: 1px solid rgba(108, 178, 224, 0.12);
+}
+
+.atl-terminal-bar span {
+  width: 0.6rem;
+  height: 0.6rem;
+  border-radius: 50%;
+  background: #175d8d;
+  opacity: 0.9;
+}
+
+.atl-terminal-bar span:nth-child(2) { background: #2e7cb5; }
+.atl-terminal-bar span:nth-child(3) { background: #f0b429; }
+
+.atl-terminal-bar em {
+  margin-left: auto;
+  font-style: normal;
+  font-family: var(--md-code-font-family);
+  font-size: 0.62rem;
+  color: #6cb2e0;
+  opacity: 0.85;
+}
+
+.atl-terminal pre {
+  margin: 0;
+  padding: 1rem 1.1rem 1.2rem;
+  background: transparent;
+  overflow-x: auto;
+}
+
+.atl-terminal code {
+  background: transparent;
+  color: #dcebf5;
+  font-size: 0.62rem;
+  line-height: 1.8;
+}
+
+.atl-terminal .atl-cmd { color: #6cb2e0; font-weight: 600; }
+.atl-terminal .atl-dim { color: #5f7d94; }
+.atl-terminal .atl-ok  { color: #3fb27f; }
+
+/* Landing-page grid cards: quiet borders, harbor hover. */
+.md-typeset .grid.cards > ul > li {
+  border-radius: 0.5rem;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.md-typeset .grid.cards > ul > li:hover {
+  border-color: #2e7cb5;
+  box-shadow: 0 6px 18px rgba(23, 93, 141, 0.15);
+}
+
+/* Keyboard-visible focus, always. */
+:focus-visible {
+  outline: 2px solid #f0b429;
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .md-typeset .grid.cards > ul > li { transition: none; }
+}

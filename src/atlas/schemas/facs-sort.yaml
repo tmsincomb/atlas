@@ -1,0 +1,201 @@
+name: facs-sort
+version: "2.5"
+description: FACS cell sorting data from BD FACSMelody
+
+detection:
+  landmark: "DataFilesFromMelody"
+  landmark_type: dir
+  landmark_parent: "ClinicalSamples"
+  unit_depth: 2
+  markers:
+    - "ClinicalSamples/DataFilesFromMelody"
+  require_any_glob:
+    - "ClinicalSamples/DataFilesFromMelody/*.[fF][cC][sS]"
+    - "ClinicalSamples/DataFilesFromMelody/*.[zZ][iI][pP]"
+
+sync:
+  include:
+    - "ClinicalSamples/**/*"
+  exclude:
+    - "**/*.tmp"
+    - "**/.DS_Store"
+
+validate:
+  required_any:
+    - "ClinicalSamples/DataFilesFromMelody/*.[fF][cC][sS]"
+    - "ClinicalSamples/DataFilesFromMelody/*.[zZ][iI][pP]"
+  required_dirs:
+    - "ClinicalSamples/DataFilesFromMelody"
+  fail_on:
+    - "_errors"
+  min_size_mb: 0.1
+  max_size_gb: 50.0
+  min_file_count: 1
+  max_file_count: 10000
+  filename_pattern: "^.*\\.(?i:fcs|csv|pdf|wsp|png|jpg|jpeg|xlsx|xml|zip)$"
+
+key_outputs:
+  melody_data: "ClinicalSamples/DataFilesFromMelody/*"
+  fcs_files: "ClinicalSamples/DataFilesFromMelody/*.[fF][cC][sS]"
+  fcs_archives: "ClinicalSamples/DataFilesFromMelody/*.[zZ][iI][pP]"
+  flowjo_workspaces: "ClinicalSamples/DataFilesFromFlowJo/*.[wW][sS][pP]"
+  data_stats: "ClinicalSamples/DataStats/*.[xX][lL][sS][xX]"
+  sort_layouts: "ClinicalSamples/SortReports/*.[pP][dD][fF]"
+
+manifest:
+  records:
+    - name: melody_fcs
+      glob: "ClinicalSamples/DataFilesFromMelody/*.[fF][cC][sS]"
+      groups:
+        - fcs
+      tags:
+        media_type: application/vnd.isac.fcs
+      asset_key:
+        field: fcs_filename
+        source: filename
+      extractors: &sample_extractors
+        - source: unit_name
+          regex: "^Sort_RunDate(?P<run_date>\\d{6})_UploadDate(?P<upload_date>\\d{6})$"
+        - source: filename
+          regex: &sample_regex "^(?P<run_purpose>KWTRP(?P<study>G\\d{3}))_(?P<sort_date>\\d{6})_(?P<instrument>M\\d+)_(?P<pubID>G\\d{3}-\\d+(?:-\\d+)?)_(?P<visit_id>V\\d+)_(?P<probe>[^_]+)_(?P<specimen>[^_]+)_(?P<sort_software>Chorus)_(?P<artifact>Data|Summary)_(?P<tube_id>T(?P<tube>\\d+))_(?P<pool_raw>(?P<pool_number>P(?P<pool>\\d+))(?P<replicate>[A-Za-z]*))\\.{1,2}(?P<file_extension>[^.]+)$"
+      constants:
+        is_control: false
+        sample_category: ClinicalSamples
+        data_source: DataFilesFromMelody
+      casts: &sample_casts
+        run_date: date
+        upload_date: date
+        sort_date: date
+        tube: integer
+        pool: integer
+      date_formats: &sample_dates
+        run_date: "%y%m%d"
+        upload_date: "%y%m%d"
+        sort_date: "%y%m%d"
+    - name: melody_sample_archive
+      glob: "ClinicalSamples/DataFilesFromMelody/*_T*_P*.[zZ][iI][pP]"
+      extractors: *sample_extractors
+      constants:
+        is_control: false
+        sample_category: ClinicalSamples
+        data_source: DataFilesFromMelody
+      casts: *sample_casts
+      date_formats: *sample_dates
+    - name: melody_archive
+      glob: "ClinicalSamples/DataFilesFromMelody/*.[zZ][iI][pP]"
+      extractors: &archive_extractors
+        - source: unit_name
+          regex: "^Sort_RunDate(?P<run_date>\\d{6})_UploadDate(?P<upload_date>\\d{6})$"
+        - source: filename
+          regex: "^(?P<run_purpose>KWTRP(?P<study>G\\d{3}))_(?P<sort_date>\\d{6})_(?P<instrument>M\\d+)_(?P<pubID>G\\d{3}-\\d+(?:-\\d+)?)_(?P<visit_id>V\\d+)\\.(?P<file_extension>[Zz][Ii][Pp])$"
+      constants:
+        is_control: false
+        sample_category: ClinicalSamples
+        data_source: DataFilesFromMelody
+        pool_number: null
+      casts: &identity_casts
+        run_date: date
+        upload_date: date
+        sort_date: date
+      date_formats: &identity_dates
+        run_date: "%y%m%d"
+        upload_date: "%y%m%d"
+        sort_date: "%y%m%d"
+    - name: flowjo_workspace
+      glob: "ClinicalSamples/DataFilesFromFlowJo/*.[wW][sS][pP]"
+      groups:
+        - workspaces
+      extractors:
+        - source: unit_name
+          regex: "^Sort_RunDate(?P<run_date>\\d{6})_UploadDate(?P<upload_date>\\d{6})$"
+        - source: filename
+          regex: "^(?P<run_purpose>KWTRP(?P<study>G\\d{3}))_(?P<sort_date>\\d{6})_(?P<instrument>M\\d+)_(?P<pubID>G\\d{3}-\\d+(?:-\\d+)?)_(?P<visit_id>V\\d+)\\.{1,2}(?P<file_extension>[Ww][Ss][Pp])$"
+      constants:
+        is_control: false
+        sample_category: ClinicalSamples
+        data_source: DataFilesFromFlowJo
+        pool_number: null
+      casts: *identity_casts
+      date_formats: *identity_dates
+    - name: data_stats_sample
+      glob: "ClinicalSamples/DataStats/*_T*_P*.[xX][lL][sS][xX]"
+      groups:
+        - data_stats
+      extractors: *sample_extractors
+      constants:
+        is_control: false
+        sample_category: ClinicalSamples
+        data_source: DataStats
+      casts: *sample_casts
+      date_formats: *sample_dates
+    - name: data_stats_control
+      glob: "ClinicalSamples/DataStats/*_Control.[xX][lL][sS][xX]"
+      groups:
+        - data_stats
+      extractors: &control_extractors
+        - source: unit_name
+          regex: "^Sort_RunDate(?P<run_date>\\d{6})_UploadDate(?P<upload_date>\\d{6})$"
+        - source: filename
+          regex: &control_regex "^(?P<run_purpose>KWTRP(?P<study>G\\d{3}))_(?P<sort_date>\\d{6})_(?P<instrument>M\\d+)_(?P<pubID>G\\d{3}-\\d+(?:-\\d+)?)_(?P<visit_id>V\\d+)_(?P<probe>[^_]+)_(?P<specimen>[^_]+)_(?P<sort_software>Chorus)_(?P<artifact>Data|Summary)_Control\\.{1,2}(?P<file_extension>[^.]+)$"
+      constants:
+        is_control: true
+        sample_category: ClinicalSamples
+        data_source: DataStats
+        pool_number: null
+      casts: &control_casts
+        run_date: date
+        upload_date: date
+        sort_date: date
+      date_formats: &control_dates
+        run_date: "%y%m%d"
+        upload_date: "%y%m%d"
+        sort_date: "%y%m%d"
+    - name: sort_report_sample
+      glob: "ClinicalSamples/SortReports/*_T*_P*.[pP][dD][fF]"
+      extractors: *sample_extractors
+      constants:
+        is_control: false
+        sample_category: ClinicalSamples
+        data_source: SortReports
+      casts: *sample_casts
+      date_formats: *sample_dates
+    - name: sort_report_control
+      glob: "ClinicalSamples/SortReports/*_Control.[pP][dD][fF]"
+      extractors: *control_extractors
+      constants:
+        is_control: true
+        sample_category: ClinicalSamples
+        data_source: SortReports
+        pool_number: null
+      casts: *control_casts
+      date_formats: *control_dates
+  relationships:
+    - name: workspace_fcs
+      left:
+        record_type: flowjo_workspace
+        fields: [pubID, visit_id]
+        required: true
+      right:
+        record_type: melody_fcs
+        fields: [pubID, visit_id]
+        required: true
+      cardinality: one_to_many
+  tables:
+    - name: sequencing_manifest
+      glob: "**/sequencing_manifest.csv"
+      optional: true
+      rename:
+        ptid: pubID
+        timepoint: visit_id
+        sorted_date: sort_date
+      casts:
+        pubID: string
+        visit_id: string
+        sort_date: date
+        pool_number: string
+      date_formats:
+        sort_date: "%y%m%d"
+      join:
+        left: [sort_date, visit_id, pool_number]
+        right: [sort_date, visit_id, pool_number]
+        cardinality: one_to_many

@@ -1,0 +1,41 @@
+name: monorepo-build
+version: "1.1"
+description: Monorepo workspace build output (supports both flat and per-package layouts)
+
+detection:
+  landmark: ".workspace-stamp"  # seed on the workspace build stamp directory
+  landmark_type: dir
+  unit_depth: 1                 # unit dir is the landmark's parent
+  markers:                      # all must exist under the unit dir
+    - "dist/config.json"
+    - ".workspace-stamp"
+    - "_buildmeta"
+
+sync:
+  include:
+    - "dist/**/*"
+  exclude:
+    - "**/*.map"
+
+validate:
+  required:
+    - "dist/config.json"
+  required_any:                 # either supported layout may supply the bundle
+    - "dist/packages/*/bundle.js"
+    - "dist/bundle.js"
+  fail_on:
+    - "_errors"
+    - "*.error"
+  min_size_mb: 1.0
+  max_size_gb: 20.0
+  min_file_count: 2
+  max_file_count: 100000
+
+key_outputs:
+  # Per-package and flat layouts have explicit output names.
+  pkg_bundle: "dist/packages/{package}/bundle.js"
+  pkg_manifest: "dist/packages/{package}/manifest.json"
+  bundle_legacy: "dist/bundle.js"
+  config: "dist/config.json"
+  report: "dist/report.html"
+  report_legacy: "dist/build-report.html"

@@ -1,0 +1,29 @@
+name: report-bundle
+# version omitted -> defaults to "1.0"
+description: Validation-only report bundle (no detection; validate an assembled report)
+
+# No `detection` block: landmark is None, so `atlas detect` skips this schema.
+# Use it explicitly with `atlas validate PATH --schema report-bundle`.
+
+# No `sync` block: with no include patterns, validation runs against every file.
+
+validate:
+  required:
+    - "report.pdf"
+  required_dirs:
+    - "figures"
+  warn_if_missing:
+    - "summary.md"
+    - "data"
+  fail_on:
+    - "_errors"
+  min_size_mb: 0.01
+  max_size_gb: 10.0
+  min_file_count: 1
+  max_file_count: 10000
+  # filename_pattern omitted -> defaults to None (no filename check)
+
+key_outputs:
+  report: "report.pdf"
+  figures: "figures/*.png"
+  summary: "summary.md"

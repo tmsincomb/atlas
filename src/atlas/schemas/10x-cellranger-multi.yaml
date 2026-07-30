@@ -1,0 +1,110 @@
+name: 10x-cellranger-multi
+version: "1.1"
+description: 10x Genomics Cell Ranger multi pipeline output (supports both pre-v8 and v8+ layouts)
+
+detection:
+  landmark: "outs/config.csv"
+  landmark_type: file
+  unit_depth: 2
+  markers:
+    - "outs/config.csv"
+    - "SC_MULTI_CS"
+    - "_cmdline"
+  require_any_glob:
+    - "outs/per_sample_outs/*/count/sample_filtered_feature_bc_matrix.h5"
+    - "outs/per_sample_outs/*/vdj_b/filtered_contig_annotations.csv"
+    # Pre-v8 layout: files directly under outs/
+    - "outs/filtered_feature_bc_matrix.h5"
+
+sync:
+  include:
+    - "outs/**/*"
+  exclude:
+    - "SC_MULTI_CS/**/*"
+    - "_*"
+    - "*.mri.tgz"
+
+validate:
+  required:
+    - "outs/config.csv"
+  required_any:
+    - "outs/per_sample_outs/*/count/sample_filtered_feature_bc_matrix.h5"
+    - "outs/per_sample_outs/*/vdj_b/filtered_contig_annotations.csv"
+    - "outs/filtered_feature_bc_matrix.h5"
+  required_dirs:
+    - "outs"
+  fail_on:
+    - "_errors"
+    - "*.error"
+  min_size_mb: 1.0
+  max_size_gb: 500.0
+  min_file_count: 10
+  max_file_count: 100000
+  filename_pattern: null
+
+key_outputs:
+  # v8+ layout paths (fallback to pre-v8 paths at locate time)
+  gex_matrix: "outs/multi/count/raw_feature_bc_matrix.h5"
+  gex_matrix_legacy: "outs/raw_feature_bc_matrix.h5"
+  filtered_matrix: "outs/multi/count/filtered_feature_bc_matrix.h5"
+  filtered_matrix_legacy: "outs/filtered_feature_bc_matrix.h5"
+  filtered_matrix_dir: "outs/filtered_feature_bc_matrix"
+  vdj_contigs: "outs/per_sample_outs/{sample}/vdj_b/filtered_contig_annotations.csv"
+  web_summary: "outs/multi/web_summary.html"
+  web_summary_legacy: "outs/qc_report.html"
+  metrics: "outs/multi/count/metrics_summary.csv"
+  metrics_legacy: "outs/qc_library_metrics.csv"
+
+manifest:
+  records:
+    - name: config
+      glob: "outs/config.csv"
+      extractors: &cellranger_multi_unit
+        - source: unit_name
+          regex: "^(?P<library_id>.+)$"
+    - name: filtered_matrix
+      glob: "outs/multi/count/filtered_feature_bc_matrix.h5"
+      extractors: *cellranger_multi_unit
+    - name: filtered_matrix_legacy
+      glob: "outs/filtered_feature_bc_matrix.h5"
+      extractors: *cellranger_multi_unit
+    - name: sample_filtered_matrix
+      glob: "outs/per_sample_outs/*/count/sample_filtered_feature_bc_matrix.h5"
+      extractors:
+        - source: unit_name
+          regex: "^(?P<library_id>.+)$"
+        - source: relative_path
+          regex: "^outs/per_sample_outs/(?P<sample_id>[^/]+)/count/sample_filtered_feature_bc_matrix\\.h5$"
+    - name: vdj_contigs
+      glob: "outs/per_sample_outs/*/vdj_b/filtered_contig_annotations.csv"
+      extractors:
+        - source: unit_name
+          regex: "^(?P<library_id>.+)$"
+        - source: relative_path
+          regex: "^outs/per_sample_outs/(?P<sample_id>[^/]+)/vdj_b/filtered_contig_annotations\\.csv$"
+    - name: web_summary
+      glob: "outs/multi/web_summary.html"
+      extractors: *cellranger_multi_unit
+    - name: metrics
+      glob: "outs/multi/count/metrics_summary.csv"
+      extractors: *cellranger_multi_unit
+  tables:
+    - name: sequencing_manifest
+      glob: "**/sequencing_manifest.csv"
+      optional: true
+      rename:
+        ptid: pubID
+        timepoint: visit_id
+        sorted_date: sort_date
+      casts:
+        pubID: string
+        visit_id: string
+        sort_date: date
+        pool_number: string
+        vdj_index: string
+      date_formats:
+        sort_date: "%y%m%d"
+      join:
+        left: [library_id]
+        right: [vdj_index]
+        cardinality: one_to_many

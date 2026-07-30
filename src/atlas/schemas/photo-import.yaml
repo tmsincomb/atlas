@@ -1,0 +1,36 @@
+name: photo-import
+version: "2.0"
+description: Photo import from a camera card into a media library
+
+detection:
+  landmark: "RawPhotos"           # seed on the imported photo directory
+  landmark_type: dir
+  landmark_parent: "MediaLibrary"   # only under MediaLibrary/
+  unit_depth: 2                # walk up past MediaLibrary/ to the shoot dir
+  markers:
+    - "MediaLibrary/RawPhotos"
+  require_any_glob:            # a real import contains a JPEG (case-insensitive)
+    - "MediaLibrary/RawPhotos/*.[jJ][pP][gG]"
+    - "MediaLibrary/RawPhotos/*.[jJ][pP][eE][gG]"
+
+sync:
+  include:
+    - "MediaLibrary/**/*"
+  exclude:
+    - "**/*.tmp"
+    - "**/.DS_Store"
+
+validate:
+  required_dirs:
+    - "MediaLibrary/RawPhotos"
+  fail_on:
+    - "_errors"
+  min_size_mb: 0.1
+  max_size_gb: 50.0
+  min_file_count: 1
+  max_file_count: 100000
+  filename_pattern: "^.*\\.(?i:jpg|jpeg|png|raw|tiff|heic|mp4|mov|pdf)$"
+
+key_outputs:
+  photos: "MediaLibrary/RawPhotos/*"
+  contact_sheets: "MediaLibrary/RawPhotos/*.pdf"

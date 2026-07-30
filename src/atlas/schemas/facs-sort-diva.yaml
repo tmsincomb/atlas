@@ -1,0 +1,131 @@
+name: facs-sort-diva
+version: "1.0"
+description: FACS cell sorting data exported by BD FACSDiva
+
+detection:
+  landmark: "PopulationSummaryFilesFromDV"
+  landmark_type: dir
+  landmark_parent: "ClinicalSamples"
+  unit_depth: 2
+  markers:
+    - "ClinicalSamples/PopulationSummaryFilesFromDV"
+  require_any_glob:
+    - "ClinicalSamples/PopulationSummaryFilesFromDV/*.csv"
+
+sync:
+  include:
+    - "**/*"
+  exclude:
+    - "**/*.tmp"
+    - "**/.DS_Store"
+
+validate:
+  required_any:
+    - "ClinicalSamples/PopulationSummaryFilesFromDV/*.csv"
+  required_dirs:
+    - "ClinicalSamples/PopulationSummaryFilesFromDV"
+  fail_on:
+    - "_errors"
+  min_size_mb: 0.1
+  max_size_gb: 50.0
+  min_file_count: 1
+  max_file_count: 10000
+  filename_pattern: "^.*\\.(?i:fcs|csv|docx|xlsx|xml)$"
+
+key_outputs:
+  flow_manifest: "*_FlowManifest.xlsx"
+  clinical_fcs: "ClinicalSamples/DataFilesFromDV/*.fcs"
+  clinical_summaries: "ClinicalSamples/PopulationSummaryFilesFromDV/*.csv"
+  clinical_sort_reports: "ClinicalSamples/SortReportsFromDV/*.csv"
+  control_fcs: "ControlSamples/DataFilesFromDV/*.fcs"
+  control_summaries: "ControlSamples/PopulationSummaryFilesFromDV/*.csv"
+  control_sort_reports: "ControlSamples/SortReportsFromDV/*.csv"
+
+manifest:
+  records:
+    - name: clinical_fcs
+      glob: "ClinicalSamples/DataFilesFromDV/*.fcs"
+      groups:
+        - fcs
+      tags:
+        media_type: application/vnd.isac.fcs
+      asset_key:
+        field: fcs_filename
+        source: filename
+      extractors: &diva_extractors
+        - source: unit_name
+          regex: "^Sort_RunDate(?P<run_date>\\d{6})_UploadDate(?P<upload_date>\\d{6})$"
+        - source: filename
+          regex: "^Sort_(?P<sort_date>\\d{6})_(?P<instrument>[^_]+)_(?P<study>G\\d{3})-?(?P<subject>\\d+)_(?P<visit_id>V\\d+)_(?P<probe>[^_]+)_(?P<specimen>[^_]+)_(?P<well_id>HT\\d+)_(?P<platform>DV)_(?P<artifact>Primary|Summary|SortRpt)_T(?P<tube>\\d+)_P(?P<pool>\\d+)_(?P<replicate>[A-Za-z])\\.(?P<file_extension>[^.]+)$"
+      derive: &diva_derive
+        pubID: "{study}-{subject}"
+        tube_id: "T{tube}"
+        pool_number: "P{pool}"
+      casts: &diva_casts
+        run_date: date
+        sort_date: date
+        tube: integer
+        pool: integer
+      date_formats: &diva_date_formats
+        run_date: "%y%m%d"
+        sort_date: "%y%m%d"
+    - name: clinical_summary
+      glob: "ClinicalSamples/PopulationSummaryFilesFromDV/*.csv"
+      extractors: *diva_extractors
+      derive: *diva_derive
+      casts: *diva_casts
+      date_formats: *diva_date_formats
+    - name: clinical_sort_report
+      glob: "ClinicalSamples/SortReportsFromDV/*.csv"
+      extractors: *diva_extractors
+      derive: *diva_derive
+      casts: *diva_casts
+      date_formats: *diva_date_formats
+    - name: control_fcs
+      glob: "ControlSamples/DataFilesFromDV/*.fcs"
+      groups:
+        - fcs
+      tags:
+        media_type: application/vnd.isac.fcs
+      asset_key:
+        field: fcs_filename
+        source: filename
+      extractors: &diva_control_extractors
+        - source: unit_name
+          regex: "^Sort_RunDate(?P<run_date>\\d{6})_UploadDate(?P<upload_date>\\d{6})$"
+        - source: filename
+          regex: "^Sort_(?P<sort_date>\\d{6})_(?P<instrument>[^_]+)_(?P<sample_id>[^_]+)_(?P<well_id>HT\\d+)_(?P<platform>DV)_(?P<artifact>Primary|Summary|SortRpt)_T(?P<tube>\\d+)_P(?P<pool>\\d+)_(?P<replicate>[A-Za-z])\\.(?P<file_extension>[^.]+)$"
+      derive: &diva_control_derive
+        tube_id: "T{tube}"
+        pool_number: "P{pool}"
+      casts: &diva_control_casts
+        run_date: date
+        sort_date: date
+        tube: integer
+        pool: integer
+      date_formats: *diva_date_formats
+    - name: control_summary
+      glob: "ControlSamples/PopulationSummaryFilesFromDV/*.csv"
+      extractors: *diva_control_extractors
+      derive: *diva_control_derive
+      casts: *diva_control_casts
+      date_formats: *diva_date_formats
+    - name: control_sort_report
+      glob: "ControlSamples/SortReportsFromDV/*.csv"
+      extractors: *diva_control_extractors
+      derive: *diva_control_derive
+      casts: *diva_control_casts
+      date_formats: *diva_date_formats
+    - name: flow_manifest
+      glob: "*_FlowManifest.xlsx"
+      extractors:
+        - source: unit_name
+          regex: "^Sort_RunDate(?P<run_date>\\d{6})_UploadDate(?P<upload_date>\\d{6})$"
+        - source: filename
+          regex: "^(?P<manifest_date>\\d{6})_FlowManifest\\.xlsx$"
+      casts:
+        run_date: date
+        manifest_date: date
+      date_formats:
+        run_date: "%y%m%d"
+        manifest_date: "%y%m%d"

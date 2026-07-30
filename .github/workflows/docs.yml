@@ -1,0 +1,51 @@
+name: Docs
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  # MkDocs site (mkdocs.yml at the repo root): strict build on every PR,
+  # gh-pages deploy on pushes to main.
+  site:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v7
+        with:
+          enable-cache: true
+      - name: Build site (strict — fail on broken links/nav)
+        run: uv run --group docs mkdocs build --strict
+      - name: Configure git credentials
+        if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+      - name: Deploy to gh-pages
+        if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+        run: uv run --group docs mkdocs gh-deploy --force
+
+  api-docs:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v7
+        with:
+          enable-cache: true
+      - name: Build API docs
+        run: uv run --with pdoc pdoc atlas -o api-docs
+      - uses: actions/upload-artifact@v7
+        with:
+          name: api-docs
+          path: api-docs/
+      - name: Point to artifact
+        run: echo "API docs uploaded as the api-docs artifact on this run." >> "$GITHUB_STEP_SUMMARY"

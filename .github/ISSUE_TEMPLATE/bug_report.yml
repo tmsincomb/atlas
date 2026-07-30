@@ -1,0 +1,46 @@
+name: Bug report
+description: Report a problem with atlas
+labels: ["type/bug"]
+body:
+  - type: input
+    id: version
+    attributes:
+      label: Atlas version
+      description: Output of `atlas --version` (or `pip show atlas`).
+      placeholder: "0.1.0"
+    validations:
+      required: true
+  - type: textarea
+    id: command
+    attributes:
+      label: Command run
+      description: The exact atlas command or Python call that triggered the bug.
+      render: shell
+    validations:
+      required: true
+  - type: textarea
+    id: schema
+    attributes:
+      label: Schema involved
+      description: The schema map or relevant excerpt being validated (redact anything sensitive).
+      render: yaml
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+      description: What you expected to happen.
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+      description: What actually happened.
+    validations:
+      required: true
+  - type: textarea
+    id: traceback
+    attributes:
+      label: Traceback / error output
+      description: Full traceback or error message, if any.
+      render: pytb

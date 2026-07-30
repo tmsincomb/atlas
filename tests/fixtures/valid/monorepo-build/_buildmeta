@@ -1,0 +1,1 @@
+bundler workspace --out dist --production

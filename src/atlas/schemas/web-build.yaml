@@ -1,0 +1,45 @@
+name: web-build
+version: "1.0"
+description: Single-page web app build output (bundler build)
+
+detection:
+  landmark: "dist/app.js"      # seed on the built app bundle
+  landmark_type: file
+  unit_depth: 2                # walk up past dist/ to the project dir
+  markers:
+    - "dist/app.js"
+    - "_buildmeta"
+  exclude_if_markers:          # these belong to a monorepo build, not a single app
+    - ".workspace-stamp"
+    - "dist/packages"
+  exclude_if_cmdline_subcommand:   # skip when _buildmeta records `bundler workspace`
+    file: "_buildmeta"
+    tool: "bundler"
+    subcommand: "workspace"
+
+sync:
+  include:
+    - "dist/**/*"
+  exclude:
+    - "**/*.map"
+
+validate:
+  required:
+    - "dist/app.js"
+    - "dist/index.html"
+  warn_if_missing:
+    - "dist/report.html"
+    - "dist/stats.json"
+  fail_on:
+    - "_errors"
+    - "*.error"
+  min_size_mb: 0.5
+  max_size_gb: 5.0
+  min_file_count: 2
+  max_file_count: 50000
+
+key_outputs:
+  bundle: "dist/app.js"
+  index: "dist/index.html"
+  report: "dist/report.html"
+  stats: "dist/stats.json"

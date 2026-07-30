@@ -1,0 +1,43 @@
+name: 10x-bcl-demux
+version: "1.0"
+description: BCL demultiplexing output (bcl2fastq / bcl-convert)
+
+detection:
+  landmark: "Reports"
+  landmark_type: dir
+  unit_depth: 1
+  markers:
+    - "Reports"
+    - "Logs"
+  require_any_glob:
+    - "**/*.fastq.gz"
+
+sync:
+  include:
+    - "**/*.fastq.gz"
+    - "Reports/**/*"
+    - "Stats/**/*"
+  exclude:
+    - "Logs/**/*"
+    - "**/Undetermined_*.fastq.gz"
+
+validate:
+  required_any:
+    - "**/*.fastq.gz"
+  required_dirs:
+    - "Reports"
+  warn_if_missing:
+    - "Stats/DemultiplexingStats.xml"
+  fail_on:
+    - "_errors"
+    - "*.error"
+  min_size_mb: 10.0
+  max_size_gb: 2000.0
+  min_file_count: 1
+  max_file_count: 500000
+  filename_pattern: null
+
+key_outputs:
+  reports: "Reports/"
+  stats: "Stats/"
+  fastqs: "**/*.fastq.gz"

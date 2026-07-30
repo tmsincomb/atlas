@@ -1,0 +1,140 @@
+[build-system]
+requires = ["setuptools>=68.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "atlas-manifest"
+version = "0.3.0"
+description = "Schema maps and validation for data trees — the backbones that define what valid data looks like"
+readme = "README.md"
+license = {text = "MIT"}
+requires-python = ">=3.9"
+authors = [
+    {name = "Troy Sincomb", email = "troysincomb@gmail.com"},
+]
+keywords = ["schema", "validation", "cli"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+]
+dependencies = [
+    "click>=8.0",
+    "openpyxl>=3.1",
+    "pandas>=2.0",
+    "pydantic>=2.0",
+    "pyyaml>=6.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "deptry>=0.20",
+    "mypy>=1.14,<2",
+    "pandas-stubs>=2.0",
+    "pre-commit>=4.0",
+    "pytest>=7.0",
+    "pytest-asyncio>=0.24",
+    "pytest-cov>=6.0",
+    "pytest-randomly>=3.15",
+    "pytest-rerunfailures>=14.0",
+    "rich>=14.2",
+    # Capped to the generation uv.lock and .pre-commit-config.yaml pin (0.15.20).
+    # CI installs this extra unpinned, so it floated to 0.16, which formats Python
+    # blocks inside Markdown and reported 3 doc files as unformatted -- a failure
+    # nobody could reproduce locally against the lockfile.
+    "ruff>=0.4,<0.16",
+    "sentry-sdk>=2.0",
+    "textual>=8",
+    "types-PyYAML",
+    "vulture>=2.11",
+]
+sentry = [
+    "sentry-sdk>=2.0",
+]
+# Interactive schema/validation inspector (`atlas tui`); see ADR-0002.
+# textual 8 keeps the Python 3.9 floor; rich is a textual dependency but
+# tui_app imports it directly for Text.from_ansi.
+tui = [
+    "rich>=14.2",
+    "textual>=8",
+]
+
+[dependency-groups]
+# Docs-site toolchain (mkdocs.yml at the repo root): uv run --group docs mkdocs serve
+docs = [
+    "mkdocs>=1.6,<2",
+    "mkdocs-material>=9.5,<10",
+]
+
+[project.scripts]
+atlas = "atlas.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+atlas = ["schemas/*.yaml"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+doctest_optionflags = ["NORMALIZE_WHITESPACE", "ELLIPSIS"]
+addopts = [
+    "--cov=atlas",
+    "--cov-report=term-missing",
+    "--cov-fail-under=70",
+    "--durations=10",
+]
+# pytest-asyncio runs in strict mode (the default): only tests marked
+# @pytest.mark.asyncio are collected as async (the Textual app tests).
+asyncio_default_fixture_loop_scope = "function"
+
+[tool.ruff]
+target-version = "py39"
+line-length = 120
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM", "RUF", "N", "C90", "FIX"]
+
+[tool.ruff.lint.mccabe]
+max-complexity = 10
+
+[tool.ruff.lint.isort]
+known-first-party = ["atlas"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+line-ending = "auto"
+
+[tool.mypy]
+python_version = "3.9"
+files = ["src/atlas"]
+strict = true
+warn_unused_configs = true
+
+[tool.deptry]
+known_first_party = ["atlas"]
+
+[tool.deptry.per_rule_ignores]
+# Dev-only tooling: invoked as commands or loaded as pytest plugins, never imported.
+# openpyxl is a real runtime dependency, but pandas loads it as the .xlsx engine
+# rather than us importing it by name, so deptry cannot see the use.
+DEP002 = [
+    "deptry",
+    "mypy",
+    "openpyxl",
+    "pandas-stubs",
+    "pre-commit",
+    "pytest",
+    "pytest-asyncio",
+    "pytest-cov",
+    "pytest-randomly",
+    "pytest-rerunfailures",
+    "ruff",
+    "types-PyYAML",
+    "vulture",
+]

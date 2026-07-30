@@ -1,0 +1,38 @@
+name: csv-dataset
+version: "1.0"
+description: Tabular data export (a directory of CSV extracts)
+
+detection:
+  landmark: "Exports"          # seed on the exports directory
+  landmark_type: dir
+  unit_depth: 1                # unit dir is the parent holding Exports/ and Logs/
+  markers:
+    - "Exports"
+    - "Logs"
+  require_any_glob:            # a real export contains at least one CSV
+    - "Exports/**/*.csv"
+
+sync:
+  include:
+    - "Exports/**/*"
+    - "Stats/**/*"
+  exclude:
+    - "**/*.tmp"
+
+validate:
+  required_dirs:
+    - "Exports"
+  warn_if_missing:
+    - "Stats/summary.json"
+  fail_on:
+    - "_errors"
+    - "*.error"
+  min_size_mb: 0.1
+  max_size_gb: 100.0
+  min_file_count: 1
+  max_file_count: 500000
+
+key_outputs:
+  tables: "Exports/*.csv"
+  summary: "Stats/summary.json"
+  logs: "Logs/"

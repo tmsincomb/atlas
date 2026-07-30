@@ -1,0 +1,40 @@
+name: site-archive
+version: "1.0"
+description: Static website archive (a self-contained snapshot directory)
+
+detection:
+  landmark: "archive.json"     # seed on the archive manifest
+  landmark_type: file
+  unit_depth: 1                # unit dir is the archive directory holding archive.json
+  markers:
+    - "archive.json"
+    - "content/pages"
+  unit_is_directory_stage: true
+
+sync:
+  include:
+    - "**/*"
+  exclude:
+    - "cache/**"
+    - "tmp/**"
+
+validate:
+  required:
+    - "archive.json"
+  required_dirs:
+    - "content/pages"
+  warn_if_missing:
+    - "metadata.json"
+    - "assets"
+  fail_on:
+    - "archive.json.error"
+  min_size_mb: 10.0
+  max_size_gb: 500.0
+  min_file_count: 3
+  max_file_count: 1000000
+
+key_outputs:
+  manifest: "archive.json"
+  metadata: "metadata.json"
+  pages: "content/pages/"
+  assets: "assets/"

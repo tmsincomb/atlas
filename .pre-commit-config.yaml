@@ -1,0 +1,53 @@
+repos:
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.15.20
+    hooks:
+      - id: ruff
+        args: [--fix]
+      - id: ruff-format
+
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    # Track the dev extra's `mypy>=1.14,<2` so the hook and CI check with the same
+    # major. v2.x also can't install here: mypy 2 requires Python >=3.10 and the
+    # hook env is built on the project venv's 3.9.
+    rev: v1.19.1
+    hooks:
+      - id: mypy
+        # textual/rich: tui_app.py subclasses their types; without them the
+        # isolated hook env sees Any and strict mypy rejects the subclassing.
+        additional_dependencies: [types-PyYAML, pydantic, click, sentry-sdk, textual, rich]
+        files: ^src/atlas/
+
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: check-added-large-files
+        args: [--maxkb=500]
+      - id: check-yaml
+        # mkdocs.yml uses !!python/name: tags (pymdownx emoji/superfences);
+        # --unsafe parses for syntax only instead of instantiating tags.
+        args: [--unsafe]
+      - id: check-toml
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+      - id: check-merge-conflict
+
+  - repo: https://github.com/jendrikseipp/vulture
+    rev: v2.16
+    hooks:
+      - id: vulture
+        # --ignore-names cls: vulture 2.16 flags the conventional (unused) cls
+        # arg of pydantic @field_validator classmethods; ruff N804 requires the name.
+        args: [src, --min-confidence, "80", --ignore-names, cls]
+
+  - repo: local
+    hooks:
+      - id: no-real-pubids
+        # Real trial pubIDs must never reach this public repo. Fixture pubIDs are
+        # 0-prefixed (G002-091, G003-08-004), so any G00N- followed by 1-9 is a
+        # real one pasted from a filename. Study codes (G002, /data/G003/sorting,
+        # G003-style) have no digit after the hyphen and are unaffected.
+        name: no real participant pubIDs (fixture pubIDs must be 0-prefixed)
+        language: pygrep
+        entry: 'G00[0-9]-[1-9]'
+        types: [text]
