@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "atlas-manifest"
-version = "0.3.0"
+version = "0.1.0"
 description = "Schema maps and validation for data trees — the backbones that define what valid data looks like"
 readme = "README.md"
 license = {text = "MIT"}
@@ -19,12 +19,18 @@ classifiers = [
     "Programming Language :: Python :: 3",
 ]
 dependencies = [
-    "click>=8.0",
+    "click>=8.0,<8.2",
     "openpyxl>=3.1",
     "pandas>=2.0",
     "pydantic>=2.0",
     "pyyaml>=6.0",
 ]
+
+[project.urls]
+Homepage = "https://github.com/tmsincomb/atlas"
+Repository = "https://github.com/tmsincomb/atlas"
+Issues = "https://github.com/tmsincomb/atlas/issues"
+Changelog = "https://github.com/tmsincomb/atlas/blob/main/CHANGELOG.md"
 
 [project.optional-dependencies]
 dev = [

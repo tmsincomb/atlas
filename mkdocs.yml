@@ -3,9 +3,9 @@
 
 site_name: atlas
 site_description: schema-driven cartography for project data — detect, validate, locate
-site_url: https://tmsincomb.github.io/atlas-manifest/
-repo_url: https://github.com/tmsincomb/atlas-manifest
-repo_name: tmsincomb/atlas-manifest
+site_url: https://tmsincomb.github.io/atlas/
+repo_url: https://github.com/tmsincomb/atlas
+repo_name: tmsincomb/atlas
 edit_uri: edit/main/docs/
 copyright: Copyright &copy; Troy Sincomb &mdash; MIT License
 
@@ -112,7 +112,7 @@ markdown_extensions:
 extra:
   social:
     - icon: fontawesome/brands/github
-      link: https://github.com/tmsincomb/atlas-manifest
+      link: https://github.com/tmsincomb/atlas
 
 extra_css:
   - stylesheets/extra.css

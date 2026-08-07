@@ -2,8 +2,9 @@
 
 **schema-driven cartography for project data — detect, validate, locate, extract.**
 
-[![CI](https://github.com/tmsincomb/atlas-manifest/actions/workflows/ci.yml/badge.svg)](https://github.com/tmsincomb/atlas-manifest/actions/workflows/ci.yml)
-[![Release](https://github.com/tmsincomb/atlas-manifest/actions/workflows/release.yml/badge.svg)](https://github.com/tmsincomb/atlas-manifest/actions/workflows/release.yml)
+[![CI](https://github.com/tmsincomb/atlas/actions/workflows/ci.yml/badge.svg)](https://github.com/tmsincomb/atlas/actions/workflows/ci.yml)
+[![Release](https://github.com/tmsincomb/atlas/actions/workflows/release.yml/badge.svg)](https://github.com/tmsincomb/atlas/actions/workflows/release.yml)
+[![PyPI](https://img.shields.io/pypi/v/atlas-manifest?logo=pypi&logoColor=white)](https://pypi.org/project/atlas-manifest/)
 [![Python 3.9+](https://img.shields.io/badge/python-3.9%2B-3776AB?logo=python&logoColor=white)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/license-MIT-2ea44f)](LICENSE)
 [![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
@@ -29,8 +30,8 @@ atlas as a library; atlas never calls them.
 ## Install
 
 ```bash
-pip install -e .            # library + CLI
-pip install -e ".[tui]"     # + the interactive `atlas tui` survey (textual)
+pip install atlas-manifest          # library + CLI
+pip install "atlas-manifest[tui]"   # + the interactive `atlas tui` survey (textual)
 ```
 
 This installs the `atlas` Python package and the `atlas` console script.

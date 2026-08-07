@@ -1,15 +1,12 @@
 # Installation
 
 atlas requires **Python 3.9+** and nothing else — no external binaries, no
-credentials, no configuration files. It is not yet published to PyPI, so
-install it from a source checkout.
+credentials, no configuration files.
 
-=== "pip (source checkout)"
+=== "pip"
 
     ```bash
-    git clone https://github.com/tmsincomb/atlas-manifest.git
-    cd atlas
-    pip install -e .
+    pip install atlas-manifest
     ```
 
     This installs the `atlas` Python package and the `atlas` console script.
@@ -19,7 +16,7 @@ install it from a source checkout.
 === "With Sentry error tracking"
 
     ```bash
-    pip install -e ".[sentry]"
+    pip install "atlas-manifest[sentry]"
     ```
 
     Adds `sentry-sdk`. Error tracking stays off until you set `SENTRY_DSN` —
@@ -33,14 +30,14 @@ install it from a source checkout.
     make lint     # ruff + mypy
     ```
 
-    See [CONTRIBUTING.md](https://github.com/tmsincomb/atlas-manifest/blob/main/CONTRIBUTING.md)
+    See [CONTRIBUTING.md](https://github.com/tmsincomb/atlas/blob/main/CONTRIBUTING.md)
     for conventions, commit style, and PR flow.
 
 ## Verify the install
 
 ```console
 $ atlas --version
-atlas, version 0.2.0
+atlas, version 0.1.0
 
 $ atlas schemas
 10x-bcl-demux         1.0     BCL demultiplexing output (bcl2fastq / bcl-convert)

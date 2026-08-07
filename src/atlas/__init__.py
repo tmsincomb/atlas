@@ -64,9 +64,10 @@ from atlas.schema import (
 from atlas.validate import RuleResult, ValidationResult, validate_data_unit
 
 try:
-    __version__ = version("atlas")
+    # Distribution name (atlas-manifest), not the import name.
+    __version__ = version("atlas-manifest")
 except PackageNotFoundError:
-    __version__ = "0.3.0"
+    __version__ = "0.0.0"
 
 __all__ = [
     "AtlasManifest",
