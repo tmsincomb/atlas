@@ -37,7 +37,7 @@ credentials, no configuration files.
 
 ```console
 $ atlas --version
-atlas, version 0.1.0
+atlas, version 0.1.1
 
 $ atlas schemas
 10x-bcl-demux         1.0     BCL demultiplexing output (bcl2fastq / bcl-convert)

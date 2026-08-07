@@ -1,4 +1,4 @@
-# 🗺️ atlas <a href="#anatomy-of-a-schema-yaml"><img align="right" width="42%" src="docs/assets/hero.svg" alt="Animated atlas hero: a parchment schema sheet projects a holographic directory tree; a scan sweep detects data units, checkmarks validate them, and gold pins locate key outputs"></a>
+# 🗺️ atlas <a href="#anatomy-of-a-schema-yaml"><img align="right" width="42%" src="https://raw.githubusercontent.com/tmsincomb/atlas/main/docs/assets/hero.svg" alt="Animated atlas hero: a parchment schema sheet projects a holographic directory tree; a scan sweep detects data units, checkmarks validate them, and gold pins locate key outputs"></a>
 
 **schema-driven cartography for project data — detect, validate, locate, extract.**
 
