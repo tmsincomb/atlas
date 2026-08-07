@@ -15,7 +15,7 @@ from typing import Any
 import click
 import yaml
 
-from atlas import analytics, metrics
+from atlas import __version__, analytics, metrics
 from atlas.detect import detect as detect_types
 from atlas.log import configure_logging, get_logger
 from atlas.schema import Schema, SchemaError, discover_schemas, load_all_schemas, resolve_schema
@@ -49,7 +49,7 @@ class InstrumentedGroup(click.Group):
 
 
 @click.group(cls=InstrumentedGroup)
-@click.version_option(package_name="atlas")
+@click.version_option(version=__version__, prog_name="atlas")
 def main() -> None:
     """Map and validate data trees against atlas schemas."""
     configure_logging()

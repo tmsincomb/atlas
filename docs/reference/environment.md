@@ -3,7 +3,7 @@
 atlas requires no secrets or credentials. Every variable below is optional
 and everything is **off (or quiet) by default** — atlas sends nothing
 anywhere unless configured. The repo ships a commented template in
-[`.env.example`](https://github.com/tmsincomb/atlas-manifest/blob/main/.env.example)
+`.env.example` in the [Atlas repository](https://github.com/tmsincomb/atlas/blob/main/.env.example)
 (`.env` files are gitignored).
 
 | Variable | Default | Effect |
@@ -12,7 +12,7 @@ anywhere unless configured. The repo ships a commented template in
 | `ATLAS_LOG_FORMAT` | `text` | `text` or `json`; JSON lines carry a per-process `run_id`. |
 | `ATLAS_FLAG_<NAME>` | per-flag | Feature flags; truthy values are `1`/`true`/`yes`/`on` (case-insensitive). Known flags: `analytics` (default off). |
 | `ATLAS_ANALYTICS_FILE` | `~/.atlas/analytics.jsonl` | Where opt-in usage events append (JSONL). |
-| `SENTRY_DSN` | unset | Enables Sentry error tracking; requires `pip install -e ".[sentry]"`. |
+| `SENTRY_DSN` | unset | Enables Sentry error tracking; requires `pip install "atlas-manifest[sentry]"`. |
 | `SENTRY_ENVIRONMENT` | `local` | Environment tag attached to Sentry events. |
 
 ## Logging
@@ -54,6 +54,6 @@ $ tail -1 ~/.atlas/analytics.jsonl
 ## Error tracking
 
 A no-op unless `SENTRY_DSN` is set **and** `sentry-sdk` is installed
-(`pip install -e ".[sentry]"`). When active, events are tagged with the
+(`pip install "atlas-manifest[sentry]"`). When active, events are tagged with the
 release (`atlas@<version>`), the `run_id`, and `SENTRY_ENVIRONMENT`. If the
 DSN is set but the SDK is missing, atlas logs a warning and continues.

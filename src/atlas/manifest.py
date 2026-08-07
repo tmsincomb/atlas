@@ -9,6 +9,7 @@ from functools import partial
 from pathlib import Path, PurePosixPath
 from types import MappingProxyType
 from typing import Any, Literal, Optional, Protocol, Union
+from typing import cast as type_cast
 
 import pandas as pd
 from pydantic import BaseModel, ConfigDict, Field
@@ -742,7 +743,7 @@ def _join_key_summary(values: pd.Series[Any]) -> str:
 
 
 def _duplicate_join_keys(values: pd.Series[Any]) -> pd.Series[Any]:
-    return values[values.duplicated(keep=False)]
+    return type_cast("pd.Series[Any]", values[values.duplicated(keep=False)])
 
 
 def _validate_join_cardinality(
@@ -1031,7 +1032,7 @@ def _attach_dataframe_frames(
     except (TypeError, ValueError) as exc:
         raise ManifestError(f"DataFrame attachment failed: {exc}") from None
 
-    unmatched_rows = joined.loc[joined[match_marker].isna()]
+    unmatched_rows = type_cast(pd.DataFrame, joined.loc[joined[match_marker].isna()])
     if unmatched == "error" and not unmatched_rows.empty:
         raise ManifestError(
             f"attachment has no match for manifest keys {left_keys!r}: "
@@ -1039,7 +1040,7 @@ def _attach_dataframe_frames(
         )
     joined = joined.sort_values([left_order, right_order], kind="stable", na_position="last")
     output_columns = list(records.columns) + output_payload
-    return joined.loc[:, output_columns].reset_index(drop=True)
+    return type_cast(pd.DataFrame, joined.loc[:, output_columns].reset_index(drop=True))
 
 
 def attach_dataframe(
@@ -1764,7 +1765,7 @@ class AtlasManifest:
 
         leading = [name for name in columns if name in frame]
         trailing = sorted(name for name in frame.columns if name not in leading)
-        return frame.loc[:, leading + trailing].convert_dtypes().reset_index(drop=True)
+        return type_cast(pd.DataFrame, frame.loc[:, leading + trailing].convert_dtypes().reset_index(drop=True))
 
 
 def load_dataframe(

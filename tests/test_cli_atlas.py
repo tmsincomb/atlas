@@ -2,11 +2,13 @@
 
 from __future__ import annotations
 
+from importlib.metadata import version
 from pathlib import Path
 
 import yaml
 from click.testing import CliRunner
 
+import atlas
 from atlas.cli import main
 from atlas.schema import Schema, load_all_schemas
 
@@ -24,6 +26,14 @@ BUILTINS = [
     "site-archive",
     "web-build",
 ]
+
+
+def test_version_uses_distribution_metadata():
+    expected = version("atlas-manifest")
+    result = CliRunner().invoke(main, ["--version"])
+
+    assert atlas.__version__ == expected
+    assert result.output == f"atlas, version {expected}\n"
 
 
 def _valid_photo_unit(base: Path) -> Path:
