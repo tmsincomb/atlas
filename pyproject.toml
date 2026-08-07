@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "atlas-manifest"
-version = "0.1.1"
+version = "0.2.0"
 description = "Schema maps and validation for data trees — the backbones that define what valid data looks like"
 readme = "README.md"
 license = {text = "MIT"}
